@@ -1,0 +1,17 @@
+[
+  {
+    "method": "GET",
+    "path": "/",
+    "form_fields": []
+  },
+  {
+    "method": "POST",
+    "path": "/analyze",
+    "form_fields": [
+      {
+        "name": "demo",
+        "value": "1"
+      }
+    ]
+  }
+]

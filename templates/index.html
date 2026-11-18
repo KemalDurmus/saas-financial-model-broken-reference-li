@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}{{ app_title }}{% endblock %}
+{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='audit.css') }}">{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="card">
+    <h2>Excel modelinizi yükleyin</h2>
+    <p class="muted">Dosyanız yalnızca bellekte taranır, sunucuda saklanmaz. Taranan: dış dosya bağlantıları, #REF! / #DIV/0! / #VALUE! gibi hatalar, geçersiz adlandırılmış alanlar ve dairesel başvurular.</p>
+    <form method="post" action="{{ url_for('feature.analyze') }}" enctype="multipart/form-data" id="upload-form">
+      <label class="dropzone" id="dropzone" for="file">
+        <strong>.xlsx dosyasını sürükleyip bırakın</strong>
+        <span class="muted">veya tıklayıp seçin (en fazla 8 MB)</span>
+        <span id="file-name" class="badge" hidden></span>
+        <input type="file" id="file" name="file" accept=".xlsx,.xlsm">
+      </label>
+      <div class="actions">
+        <button class="btn" type="submit">Denetle</button>
+      </div>
+    </form>
+    <form method="post" action="{{ url_for('feature.analyze') }}" class="actions">
+      <input type="hidden" name="demo" value="1">
+      <button class="btn btn-secondary" type="submit">Örnek veriyle dene</button>
+    </form>
+  </div>
+
+  {% if result %}
+  <div class="card">
+    <h2>Sonuç: {{ result.filename }}</h2>
+    <p class="muted">{{ result.sheet_count }} sayfa, {{ result.cell_count }} dolu hücre, {{ result.formula_count }} formül ve {{ result.names_checked }} adlandırılmış alan tarandı.</p>
+    {% for w in result.warnings %}<div class="alert alert-warning">{{ w }}</div>{% endfor %}
+    {% if result.total_issues %}
+      <div class="alert alert-warning">{{ result.total_issues }} sorun bulundu ({{ result.problem_cells }} farklı hücre/alan{% if result.hidden_issues %}, {{ result.hidden_issues }} tanesi gizli sayfa veya sütunda{% endif %}).</div>
+    {% else %}
+      <div class="alert alert-success">Bu denetimin kapsadığı türlerde sorun bulunmadı. Bu, modelin tamamen doğru olduğu anlamına gelmez; yalnızca yukarıdaki kontroller yapıldı.</div>
+    {% endif %}
+    <div class="grid">
+      {% for t, n in result.type_counts %}
+      <div class="stat"><div class="muted">{{ t }}</div><strong>{{ n }}</strong></div>
+      {% endfor %}
+    </div>
+  </div>
+
+  {% if result.ext_files %}
+  <div class="card">
+    <h3>Başvurulan dış çalışma kitapları</h3>
+    <table class="issues">
+      <thead><tr><th>Dosya</th><th>Başvuru sayısı</th></tr></thead>
+      <tbody>
+      {% for name, n in result.ext_files %}
+        <tr><td data-label="Dosya">{{ name }}</td><td data-label="Başvuru sayısı">{{ n }}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    <p class="muted">Bu dosyaların bilgisayarınızda hâlâ var olup olmadığı kontrol edilemez; adlar yalnızca çalışma kitabındaki başvurulardan okunur.</p>
+  </div>
+  {% endif %}
+
+  {% if result.issues %}
+  <div class="card">
+    <div class="head-row">
+      <h3>Sorunlu hücreler</h3>
+      <a class="btn" download="denetim_raporu.csv" href="{{ result.csv_uri }}">CSV raporunu indir</a>
+    </div>
+    <table class="issues">
+      <thead><tr><th>Sayfa</th><th>Hücre</th><th>Tür</th><th>Önem</th><th>Ayrıntı</th><th>Formül</th></tr></thead>
+      <tbody>
+      {% for i in result.issues %}
+        <tr>
+          <td data-label="Sayfa">{{ i.sheet }}{% if i.hidden %} <span class="badge">gizli</span>{% endif %}</td>
+          <td data-label="Hücre"><code>{{ i.cell }}</code></td>
+          <td data-label="Tür">{{ i.type }}</td>
+          <td data-label="Önem">{{ i.severity }}</td>
+          <td data-label="Ayrıntı">{{ i.detail }}</td>
+          <td data-label="Formül">{% if i.formula %}<code>{{ i.formula }}</code>{% else %}—{% endif %}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+  {% endif %}
+</div>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='audit.js') }}"></script>{% endblock %}

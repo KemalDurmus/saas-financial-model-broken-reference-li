@@ -1,0 +1,14 @@
+.dropzone{display:flex;flex-direction:column;gap:.4rem;align-items:center;justify-content:center;text-align:center;padding:2rem 1rem;border:2px dashed var(--border,#888);border-radius:12px;cursor:pointer;transition:background .15s,border-color .15s}
+.dropzone.over{background:rgba(80,120,255,.12);border-color:#5078ff}
+.dropzone input[type=file]{max-width:100%}
+.actions{margin-top:1rem}
+.head-row{display:flex;flex-wrap:wrap;gap:.75rem;align-items:center;justify-content:space-between}
+table.issues td,table.issues th{overflow-wrap:anywhere;word-break:break-word;vertical-align:top}
+table.issues code{white-space:normal;overflow-wrap:anywhere}
+@media (max-width:640px){
+  table.issues,table.issues tbody,table.issues tr,table.issues td{display:block;width:100%;box-sizing:border-box}
+  table.issues thead{display:none}
+  table.issues tr{border:1px solid var(--border,#8884);border-radius:10px;padding:.5rem .75rem;margin-bottom:.75rem}
+  table.issues td{display:flex;gap:.75rem;justify-content:space-between;text-align:right;border:0;padding:.25rem 0}
+  table.issues td::before{content:attr(data-label);font-weight:600;text-align:left;flex:0 0 5.5rem}
+}
